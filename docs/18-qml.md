@@ -1,9 +1,5 @@
----
-title: 開発者のための量子コンピューティング実践入門 第18回  量子機械学習（QML）の基礎（Feature Map・量子カーネル・量子ニューラルネット）
-tags: Python QISKIT
-author: yoshiyuki_kono
-slide: false
----
+# 第18回  量子機械学習（QML）の基礎（Feature Map・量子カーネル・量子ニューラルネット）
+
 # はじめに
 前回は：
 
@@ -264,9 +260,11 @@ Optimization
 # 9. QNNの数式表現
 
 出力：
+
 $$
 f(x, \theta) = \langle 0 | U^\dagger(x, \theta) M U(x, \theta) | 0 \rangle
 $$
+
 ここで：
 
 | 記号 | 意味      |
