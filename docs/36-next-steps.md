@@ -464,3 +464,177 @@ AIの延長でもありません。
 だからこそ：
 
 **今が最も面白いタイミングです** 🚀
+
+
+---
+
+**Cirq** と **PennyLane** は、どちらも**量子プログラミング用のPythonライブラリ**ですが、設計思想と用途が少し違います。
+開発者向け量子コンピューティングの学習ロードマップ（特に Qiskit の次）としてもよく比較される組み合わせです。
+
+---
+
+# Cirq の概要
+
+**Cirq は Google 主導の量子回路フレームワーク**です。
+
+特徴：
+
+* 量子回路（gate-level）の設計に強い
+* NISQデバイス（現実の量子ハード）志向
+* Google の量子プロセッサ（Sycamore など）向け設計
+* 低レベル寄り（物理寄り）
+
+典型用途：
+
+* 回路設計
+* 量子アルゴリズム研究
+* ハードウェア近接実験
+* ノイズモデル検証
+
+例：
+
+```python
+import cirq
+
+q = cirq.LineQubit(0)
+circuit = cirq.Circuit(cirq.H(q), cirq.measure(q))
+
+print(circuit)
+```
+
+出力：
+
+```
+0: ───H───M───
+```
+
+つまり：
+
+> Qiskit に近いが、より「ハードウェア寄り」の思想
+
+です。
+
+---
+
+# PennyLane の概要
+
+**PennyLane は量子機械学習（QML）特化フレームワーク**です 🧠✨
+
+特徴：
+
+* PyTorch / TensorFlow / JAX と統合
+* 量子回路を微分可能（differentiable）
+* ハイブリッド量子–古典モデル向け
+* Variational algorithm に強い
+
+典型用途：
+
+* VQE
+* QAOA
+* 量子ニューラルネット
+* 量子最適化
+* 量子機械学習
+
+例：
+
+```python
+import pennylane as qml
+from pennylane import numpy as np
+
+dev = qml.device("default.qubit", wires=1)
+
+@qml.qnode(dev)
+def circuit(x):
+    qml.RX(x, wires=0)
+    return qml.expval(qml.PauliZ(0))
+
+print(circuit(0.5))
+```
+
+これは：
+
+> 微分できる量子回路
+
+です。
+
+つまり：
+
+量子回路 = ニューラルネットの layer
+
+として扱えます。
+
+---
+
+# Cirq と PennyLane の違い（直感比較）
+
+| 観点        | Cirq    | PennyLane  |
+| --------- | ------- | ---------- |
+| 目的        | 回路設計    | 量子ML       |
+| 思想        | 物理寄り    | 数学・最適化寄り   |
+| レベル       | 低め      | 高め         |
+| 用途        | 実験・回路制御 | VQE / QAOA |
+| 微分可能回路    | ×       | ◎          |
+| PyTorch連携 | ×       | ◎          |
+
+まとめると：
+
+* Cirq = 量子回路エンジニア向け ⚙️
+* PennyLane = 量子アルゴリズム研究者向け 🧪
+
+---
+
+# Qiskit との関係（開発者ロードマップ視点）
+
+すでにあなたが Qiskit 中心で学習を進めている流れなら：
+
+次の選択はこう整理できます：
+
+### 回路理解を深めたいなら
+
+→ Cirq
+
+理由：
+
+* ハードウェア寄り設計
+* ノイズ・配置・スケジューリング理解が進む
+
+---
+
+### NISQアルゴリズムを理解したいなら
+
+→ PennyLane
+
+理由：
+
+* VQE
+* QAOA
+* variational circuits
+* hybrid optimization
+
+が自然に書ける
+
+---
+
+# 実務視点での使い分け（重要）
+
+現代の量子開発スタックは：
+
+```
+回路設計
+↓
+変分最適化
+↓
+ハイブリッド計算
+```
+
+なので：
+
+* Cirq = 回路レイヤー
+* PennyLane = 最適化レイヤー
+
+と理解すると整理しやすいです。
+
+---
+
+
+
