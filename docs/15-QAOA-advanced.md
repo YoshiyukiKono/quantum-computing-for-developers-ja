@@ -228,13 +228,7 @@ apply_mixer_unitary(qc, beta[layer])
 
 * `p`：何回繰り返すか（深さ）
 * `n`：何ビットに適用するか（幅）
-* `n ≠ p`（ここが重要）
 
----
-
-
-
----
 
 # 4. warm-start QAOAとは何か？
 
