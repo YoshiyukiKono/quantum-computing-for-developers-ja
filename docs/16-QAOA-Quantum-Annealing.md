@@ -90,9 +90,9 @@ slide: false
 
 代表的な形：
 
-```math
+$$
 H = \sum_i h_i Z_i + \sum_{i<j} J_{ij} Z_i Z_j
-```
+$$
 
 ここで：
 
