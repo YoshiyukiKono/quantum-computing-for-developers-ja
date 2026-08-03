@@ -31,5 +31,6 @@ jobs:
       - run: python manuscript/tools/audit_code_blocks.py
       - run: python manuscript/tools/audit_references.py
       - run: python manuscript/tools/audit_tables.py
+      - run: python manuscript/tools/audit_math_rendering.py
       - run: python manuscript/tools/verify_code_examples.py
       - run: python examples/run_all.py
