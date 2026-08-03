@@ -51,7 +51,13 @@ QiskitとQiskit Aerという直接依存だけを確認したい場合は、`exa
 
 ## コード例を一括実行する
 
-最初に、原稿とコード例の対応、Python構文、廃止済みAPIの混入を検査します。
+最初に、全コードブロックの分類を検査します。ファイル名付きフェンスは単独実行可能コード、言語名だけのフェンスは説明用コード断片、`text`または無指定のフェンスは出力・疑似コード・状態表現として扱います。
+
+```bash
+python manuscript/tools/audit_code_blocks.py
+```
+
+続いて、原稿とコード例の対応、Python構文、廃止済みAPIの混入を検査します。
 
 ```bash
 python manuscript/tools/verify_code_examples.py

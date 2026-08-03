@@ -28,5 +28,6 @@ jobs:
           cache: pip
           cache-dependency-path: examples/requirements-lock.txt
       - run: python -m pip install -r examples/requirements-lock.txt
+      - run: python manuscript/tools/audit_code_blocks.py
       - run: python manuscript/tools/verify_code_examples.py
       - run: python examples/run_all.py

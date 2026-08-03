@@ -135,10 +135,13 @@ def make_pdf(config: dict) -> Path:
             super().draw()
 
     class ExecutablePreformatted(TintedPreformatted):
-        fill_color = "#E2F1F8"
+        fill_color = "#DDF1FA"
+
+    class SnippetPreformatted(TintedPreformatted):
+        fill_color = "#EAF0F6"
 
     class TextPreformatted(TintedPreformatted):
-        fill_color = "#F1F0EC"
+        fill_color = "#F4F1EB"
 
     font_regular = Path(r"C:\Windows\Fonts\NotoSansJP-VF.ttf")
     font_bold = Path(r"C:\Windows\Fonts\NotoSansJP-VF.ttf")
@@ -281,7 +284,10 @@ def make_pdf(config: dict) -> Path:
                 else:
                     if code_filename:
                         story.append(Paragraph(html.escape(code_filename), filename_style))
-                    block_type = ExecutablePreformatted if code_kind == "executable" else TextPreformatted
+                    block_type = {
+                        "executable": ExecutablePreformatted,
+                        "snippet": SnippetPreformatted,
+                    }.get(code_kind, TextPreformatted)
                     story.append(block_type("\n".join(code_buffer), code, maxLineLength=76))
                 code_buffer.clear()
                 in_code = False
@@ -298,7 +304,7 @@ def make_pdf(config: dict) -> Path:
                 if language == "math":
                     code_kind = "math"
                 elif language in executable_languages:
-                    code_kind = "executable"
+                    code_kind = "executable" if code_filename else "snippet"
                 else:
                     code_kind = "text"
                 in_code = True
@@ -403,7 +409,10 @@ def make_pdf(config: dict) -> Path:
         else:
             if code_filename:
                 story.append(Paragraph(html.escape(code_filename), filename_style))
-            block_type = ExecutablePreformatted if code_kind == "executable" else TextPreformatted
+            block_type = {
+                "executable": ExecutablePreformatted,
+                "snippet": SnippetPreformatted,
+            }.get(code_kind, TextPreformatted)
             story.append(block_type("\n".join(code_buffer), code, maxLineLength=76))
     if math_buffer:
         readable = latex_to_unicode("\n".join(math_buffer))
