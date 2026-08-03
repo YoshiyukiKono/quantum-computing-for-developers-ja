@@ -538,7 +538,7 @@ for x in candidates:
 
 量子コンピュータでは：
 
-```python
+```text
 全部同時に試して
 正解だけ強調する
 ```
@@ -608,7 +608,7 @@ if condition(x):
 つまり：
 
 ```python
-oracle(x):
+def oracle(x):
     return condition(x)
 ```
 
@@ -764,7 +764,7 @@ mark(x)
 は、実際には次の位相反転です：
 
 ```python
-phase(x) *= -1
+phase[x] *= -1
 ```
 
 この操作は、正解状態の位相だけを反転することを意味します。
