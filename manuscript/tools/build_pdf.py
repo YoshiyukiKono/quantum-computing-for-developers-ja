@@ -23,6 +23,9 @@ def assemble_book(config: dict) -> Path:
             if not path.is_file():
                 raise FileNotFoundError(f"Manuscript chapter not found: {path}")
             combined.append(path.read_text(encoding="utf-8-sig").strip() + "\n")
+            sources = chapter.get("sources", [])
+            if sources:
+                combined.extend(["", "**確認用出典** " + "、".join(f"[{source}]" for source in sources), ""])
 
     combined.extend(["", "# 付録", "", "本文の流れを止める実務手順、補助的な比較、長い思考ノートを収録する。", ""])
     for appendix in config["appendices"]:
@@ -30,6 +33,17 @@ def assemble_book(config: dict) -> Path:
         if not path.is_file():
             raise FileNotFoundError(f"Manuscript appendix not found: {path}")
         combined.append(path.read_text(encoding="utf-8-sig").strip() + "\n")
+        sources = appendix.get("sources", [])
+        if sources:
+            combined.extend(["", "**確認用出典** " + "、".join(f"[{source}]" for source in sources), ""])
+
+    if config.get("backmatter"):
+        combined.extend(["", "# 巻末資料", "", "用語の確認と、本文の事実確認に使用する資料を収録する。", ""])
+        for item in config["backmatter"]:
+            path = HERE / item["path"]
+            if not path.is_file():
+                raise FileNotFoundError(f"Manuscript backmatter not found: {path}")
+            combined.append(path.read_text(encoding="utf-8-sig").strip() + "\n")
 
     BUILD.mkdir(parents=True, exist_ok=True)
     book_path = BUILD / "book.md"
@@ -351,7 +365,7 @@ def make_pdf(config: dict) -> Path:
             style = {1: h1, 2: h2, 3: h3}.get(level, h4)
             p = Paragraph(inline_markup(title), style)
             if level == 1:
-                p.toc_level = 0 if (re.match(r"^第[IVX]+部", title) or title == "付録") else 1
+                p.toc_level = 0 if (re.match(r"^第[IVX]+部", title) or title in {"付録", "巻末資料"}) else 1
             else:
                 p.toc_level = None
             story.append(p)
