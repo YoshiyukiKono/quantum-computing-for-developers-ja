@@ -4,6 +4,7 @@ import argparse
 import html
 import json
 import re
+import unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -69,6 +70,7 @@ def latex_to_unicode(value: str) -> str:
     value = re.sub(r"\\mathbb\{C\}", "C", value)
     value = re.sub(r"\\mathbb\{R\}", "R", value)
     value = re.sub(r"\\mathbb\{N\}", "N", value)
+    value = re.sub(r"\\frac\{(.+)\}\{\\sqrt\s*([0-9A-Za-z]+)\}", r"(\1)/√\2", value)
     value = re.sub(r"\\frac\{([^{}]+)\}\{\\sqrt\{([^{}]+)\}\}", r"(\1)/√(\2)", value)
     for _ in range(4):
         value = re.sub(r"\\frac\{([^{}]+)\}\{([^{}]+)\}", r"(\1)/(\2)", value)
@@ -78,15 +80,24 @@ def latex_to_unicode(value: str) -> str:
     replacements = {
         r"\\lvert": "|", r"\\rvert": "|", r"\\left": "", r"\\right": "",
         r"\\langle": "〈", r"\\rangle": "〉", r"\\ket": "ket",
-        r"\\bra": "bra", r"\\rightarrow": "→", r"\\Rightarrow": "⇒",
+        r"\\bra": "bra", r"\\longrightarrow": "→", r"\\Longrightarrow": "⇒",
+        r"\\rightarrow": "→", r"\\Rightarrow": "⇒",
+        r"\\leftarrow": "←", r"\\Leftarrow": "⇐",
+        r"\\leftrightarrow": "↔", r"\\Leftrightarrow": "⇔",
+        r"\\mapsto": "↦", r"\\uparrow": "↑", r"\\downarrow": "↓",
         r"\\to": "→", r"\\otimes": "⊗", r"\\oplus": "⊕", r"\\times": "×",
         r"\\neq": "≠", r"\\approx": "≈", r"\\leq": "≤", r"\\geq": "≥",
         r"\\in": "∈", r"\\sum": "Σ", r"\\prod": "Π", r"\\cdot": "·",
+        r"\\cos": "cos", r"\\sin": "sin", r"\\tan": "tan",
+        r"\\exp": "exp", r"\\log": "log", r"\\ln": "ln",
         r"\\dagger": "†", r"\\pm": "±", r"\\infty": "∞",
         r"\\cdots": "…", r"\\ldots": "…", r"\\dots": "…",
         r"\\quad": "  ", r"\\;": " ", r"\\,": " ", r"\\!": "",
     }
-    for source, target in replacements.items():
+    # Commands such as \rightarrow begin with shorter valid commands such as
+    # \right. Convert longest commands first so no command suffix leaks into
+    # the rendered PDF as plain text (for example, "arrow").
+    for source, target in sorted(replacements.items(), key=lambda item: len(item[0]), reverse=True):
         value = re.sub(source, target, value)
     for name, symbol in GREEK.items():
         value = re.sub(r"\\" + name + r"(?![A-Za-z])", symbol, value)
@@ -135,25 +146,80 @@ def split_markdown_table_row(row: str) -> list[str]:
     return cells
 
 
+def character_width_kind(character: str) -> str | None:
+    """Classify visible characters for Japanese/Latin boundary spacing."""
+    if character.isspace():
+        return None
+    if unicodedata.east_asian_width(character) in {"W", "F"}:
+        return "wide"
+    if unicodedata.category(character)[0] in {"L", "N", "S"}:
+        return "narrow"
+    return None
+
+
+def add_wide_narrow_spacing(text: str) -> str:
+    """Insert an ASCII space where full-width prose meets half-width text."""
+    if len(text) < 2:
+        return text
+    rendered = [text[0]]
+    for previous, current in zip(text, text[1:]):
+        kinds = {character_width_kind(previous), character_width_kind(current)}
+        if kinds == {"wide", "narrow"}:
+            rendered.append(" ")
+        rendered.append(current)
+    return "".join(rendered)
+
+
+def visible_edge(text: str, *, reverse: bool = False) -> str | None:
+    """Return the first spacing-relevant character, ignoring Markdown marks."""
+    characters = reversed(text) if reverse else iter(text)
+    for character in characters:
+        if character_width_kind(character) is not None:
+            return character
+    return None
+
+
 def inline_markup(text: str) -> str:
     parts = re.split(r"(`[^`]+`|\$[^$\n]+\$)", text)
-    rendered: list[str] = []
+    rendered: list[tuple[str, str | None, str | None, bool, bool]] = []
     for part in parts:
         if not part:
             continue
         if part.startswith("`") and part.endswith("`"):
-            code = html.escape(part[1:-1], quote=False)
-            rendered.append(f"<font name='BIZUDGothic' color='#123354' backColor='#DCEAF7'>{code}</font>")
+            source = part[1:-1]
+            code = html.escape(source, quote=False)
+            rendered.append((
+                f"<font name='BIZUDGothic' color='#123354' backColor='#DCEAF7'>{code}</font>",
+                visible_edge(source), visible_edge(source, reverse=True),
+                False, False,
+            ))
             continue
         if part.startswith("$") and part.endswith("$"):
-            math = html.escape(latex_to_unicode(part[1:-1]), quote=False)
-            rendered.append(f"<font name='NotoSansJP' color='#7C3E00' backColor='#FFF0C2'>{math}</font>")
+            source = latex_to_unicode(part[1:-1])
+            math = html.escape(source, quote=False)
+            rendered.append((math, visible_edge(source), visible_edge(source, reverse=True), False, False))
             continue
-        escaped = html.escape(latex_to_unicode(part), quote=False)
+        source = add_wide_narrow_spacing(latex_to_unicode(part))
+        escaped = html.escape(source, quote=False)
         escaped = re.sub(r"\*\*([^*]+)\*\*", r"<b>\1</b>", escaped)
         escaped = re.sub(r"(?<!\*)\*([^*]+)\*(?!\*)", r"<i>\1</i>", escaped)
-        rendered.append(escaped)
-    return "".join(rendered)
+        rendered.append((
+            escaped, visible_edge(source), visible_edge(source, reverse=True),
+            bool(source[:1].isspace()), bool(source[-1:].isspace()),
+        ))
+
+    output: list[str] = []
+    previous_edge: str | None = None
+    previous_has_trailing_space = False
+    for markup, first_edge, last_edge, has_leading_space, has_trailing_space in rendered:
+        if previous_edge and first_edge and not previous_has_trailing_space and not has_leading_space:
+            if {character_width_kind(previous_edge), character_width_kind(first_edge)} == {"wide", "narrow"}:
+                output.append(" ")
+        output.append(markup)
+        if last_edge:
+            previous_edge = last_edge
+        previous_has_trailing_space = has_trailing_space
+    return "".join(output)
 
 
 def make_pdf(config: dict) -> Path:
@@ -197,6 +263,8 @@ def make_pdf(config: dict) -> Path:
     pdfmetrics.registerFont(TTFont("NotoSansJP", str(font_regular)))
     pdfmetrics.registerFont(TTFont("NotoSansJP-Bold", str(font_bold)))
     pdfmetrics.registerFontFamily("NotoSansJP", normal="NotoSansJP", bold="NotoSansJP-Bold")
+    math_regular = Path(r"C:\Windows\Fonts\NotoSerifJP-VF.ttf")
+    pdfmetrics.registerFont(TTFont("NotoSerifJP", str(math_regular if math_regular.exists() else font_regular)))
     code_regular = Path(r"C:\Windows\Fonts\BIZ-UDGothicR.ttc")
     code_bold = Path(r"C:\Windows\Fonts\BIZ-UDGothicB.ttc")
     try:
@@ -257,10 +325,9 @@ def make_pdf(config: dict) -> Path:
                           leftIndent=0, rightIndent=0, borderWidth=0,
                           borderPadding=(7, 8, 7, 8), backColor=None,
                           textColor=colors.HexColor("#102A3E"), wordWrap="CJK", spaceBefore=0, spaceAfter=6)
-    math_style = ParagraphStyle("JPMath", parent=base, fontName="NotoSansJP", fontSize=9.2, leading=15,
-                                alignment=TA_CENTER, borderColor=colors.HexColor("#E9A23B"), borderWidth=.7,
-                                borderPadding=(8, 9, 8, 9), backColor=colors.HexColor("#FFF8E7"),
-                                textColor=colors.HexColor("#663C00"), spaceBefore=5, spaceAfter=7)
+    math_style = ParagraphStyle("JPMath", parent=base, fontName="NotoSerifJP", fontSize=9.2, leading=15,
+                                alignment=TA_CENTER, borderWidth=0, borderPadding=0, backColor=None,
+                                textColor=colors.HexColor("#172033"), spaceBefore=5, spaceAfter=7)
     small = ParagraphStyle("JPSmall", parent=base, fontSize=7.2, leading=10.5, textColor=colors.HexColor("#475569"))
 
     OUTPUT.mkdir(parents=True, exist_ok=True)
@@ -314,9 +381,6 @@ def make_pdf(config: dict) -> Path:
 
     def append_math_block(formula: str):
         story.append(Paragraph(formula or " ", math_style))
-        # ReportLab draws paragraph borders into the padding area. Reserve an
-        # explicit gap so the following baseline never touches that border.
-        story.append(Spacer(1, 2 * mm))
 
     i = 0
     while i < len(lines):
