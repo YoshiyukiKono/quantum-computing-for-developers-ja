@@ -1,0 +1,89 @@
+{
+  "title": "開発者のための量子コンピューティング実践入門",
+  "subtitle": "量子回路の最初の一歩から、アルゴリズム・NISQ・誤り訂正まで",
+  "edition": "書籍構成ドラフト 2026-08-03",
+  "parts": [
+    {
+      "title": "第I部　量子回路を動かす",
+      "intro": "数式を先に積み上げるのではなく、まず最小の回路を動かし、測定結果から量子状態の読み方を身につける。",
+      "chapters": [
+        {"path": "content/01-first-circuits/01-first-quantum-circuit.md", "title": "最初の量子回路"},
+        {"path": "content/01-first-circuits/02-superposition-and-quantum-parallelism.md", "title": "重ね合わせと量子並列性"},
+        {"path": "content/01-first-circuits/03-measurement-and-probability.md", "title": "測定と確率分布"}
+      ]
+    },
+    {
+      "title": "第II部　量子らしさをつかむ",
+      "intro": "もつれ、干渉、位相を個別の用語ではなく、答えの確率を設計するための一続きの仕組みとして理解する。",
+      "chapters": [
+        {"path": "content/02-quantum-effects/04-entanglement-and-bell-state.md", "title": "量子もつれ、CNOT、Bell状態"},
+        {"path": "content/02-quantum-effects/05-interference-and-amplitudes.md", "title": "干渉と振幅"},
+        {"path": "content/02-quantum-effects/06-complex-numbers-and-phase.md", "title": "複素数と位相"},
+        {"path": "content/02-quantum-effects/07-quantum-gates-and-grover.md", "title": "量子ゲートと最小のGrover回路"}
+      ]
+    },
+    {
+      "title": "第III部　数学から回路設計へ",
+      "intro": "状態ベクトル、ユニタリ行列、テンソル積、可逆計算を、回路を書く開発者の視点へつなぐ。",
+      "chapters": [
+        {"path": "content/03-math-and-circuits/08-linear-algebra.md", "title": "量子計算を支える線形代数"},
+        {"path": "content/03-math-and-circuits/09-reversible-computing-and-toffoli.md", "title": "古典計算、可逆計算、Toffoliゲート"},
+        {"path": "content/03-math-and-circuits/10-quantum-circuit-design.md", "title": "量子回路を設計する"},
+        {"path": "content/03-math-and-circuits/11-sat-with-grover.md", "title": "SATをGrover回路へ変換する"}
+      ]
+    },
+    {
+      "title": "第IV部　量子アルゴリズムの見取り図",
+      "intro": "個別の手順を暗記するのではなく、オラクル、振幅増幅、位相推定という共通部品からアルゴリズムを眺める。",
+      "chapters": [
+        {"path": "content/04-algorithm-patterns/12-quantum-algorithm-patterns.md", "title": "量子アルゴリズムの設計パターン"},
+        {"path": "content/04-algorithm-patterns/13-qft-and-phase-estimation.md", "title": "量子フーリエ変換と位相推定"}
+      ]
+    },
+    {
+      "title": "第V部　NISQと変分量子アルゴリズム",
+      "intro": "ノイズのある現実のデバイスを前提に、量子回路と古典最適化を組み合わせる実装パターンを追う。",
+      "chapters": [
+        {"path": "content/05-nisq-and-vqa/14-nisq.md", "title": "NISQ時代の現実"},
+        {"path": "content/05-nisq-and-vqa/15-hamiltonian.md", "title": "ハミルトニアンという問題表現"},
+        {"path": "content/05-nisq-and-vqa/16-vqe.md", "title": "VQE - 変分量子固有値法"},
+        {"path": "content/05-nisq-and-vqa/17-qaoa.md", "title": "QAOA - 量子近似最適化アルゴリズム"},
+        {"path": "content/05-nisq-and-vqa/18-qaoa-max-cut.md", "title": "Max-CutのQAOA回路"},
+        {"path": "content/05-nisq-and-vqa/19-qaoa-hybrid-optimization.md", "title": "QAOAの古典・量子ハイブリッド最適化"},
+        {"path": "content/05-nisq-and-vqa/20-qaoa-general-graphs.md", "title": "一般グラフへQAOAを適用する"},
+        {"path": "content/05-nisq-and-vqa/21-advanced-qaoa.md", "title": "高度なQAOA設計"},
+        {"path": "content/05-nisq-and-vqa/22-qaoa-and-quantum-annealing.md", "title": "QAOAと量子アニーリング"},
+        {"path": "content/05-nisq-and-vqa/23-variational-quantum-algorithms.md", "title": "VQAとしてVQEとQAOAを統一する"},
+        {"path": "content/05-nisq-and-vqa/24-quantum-machine-learning.md", "title": "量子機械学習の基礎"}
+      ]
+    },
+    {
+      "title": "第VI部　スケールさせるための技術",
+      "intro": "誤り訂正、フォールトトレラント計算、ハードウェア、量子優位性、計算モデルを一つの将来像に配置する。",
+      "chapters": [
+        {"path": "content/06-scaling-quantum-computing/25-quantum-error-correction.md", "title": "量子誤り訂正"},
+        {"path": "content/06-scaling-quantum-computing/26-fault-tolerant-quantum-computing.md", "title": "フォールトトレラント量子計算"},
+        {"path": "content/06-scaling-quantum-computing/27-error-correction-with-qiskit.md", "title": "Qiskitで誤り訂正を試す"},
+        {"path": "content/06-scaling-quantum-computing/28-ion-trap-hardware.md", "title": "イオントラップ型ハードウェア"},
+        {"path": "content/06-scaling-quantum-computing/29-qiskit-boundaries.md", "title": "Qiskitで扱える範囲と抽象化の境界"},
+        {"path": "content/06-scaling-quantum-computing/30-quantum-advantage.md", "title": "量子優位性と計算量の境界"},
+        {"path": "content/06-scaling-quantum-computing/31-quantum-programming-models.md", "title": "量子計算のプログラミングモデル"}
+      ]
+    },
+    {
+      "title": "第VII部　次の一歩",
+      "intro": "ここまでの知識を、実装、アルゴリズム、研究、産業応用へどう伸ばすかを整理する。",
+      "chapters": [
+        {"path": "content/07-next-steps/32-learning-roadmap.md", "title": "開発者のための学習ロードマップ"}
+      ]
+    }
+  ],
+  "appendices": [
+    {"path": "appendices/a01-qiskit-setup.md", "title": "付録A　PythonとQiskitの環境構築"},
+    {"path": "appendices/a02-classical-and-quantum-gates.md", "title": "付録B　古典論理ゲートと量子ゲート"},
+    {"path": "appendices/a03-tensor-product-notes.md", "title": "付録C　テンソル積を理解するための思考ノート"}
+  ],
+  "drafts": [
+    {"path": "drafts/qaoa-alternative-draft.md", "title": "第17章の別稿（A稿）"}
+  ]
+}

@@ -1,0 +1,12 @@
+# Python environments and caches
+.venv/
+__pycache__/
+*.py[cod]
+
+# Generated manuscript artifacts
+manuscript/build/
+manuscript/output/
+manuscript/tmp/
+
+# Local scratch files
+tmp/
