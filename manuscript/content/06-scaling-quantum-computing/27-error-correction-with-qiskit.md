@@ -1,0 +1,377 @@
+# 第27章　Qiskitで誤り訂正を試す
+
+<!-- 編集元: `docs/20.5-fault-tolerant-by-Qiskit.md` -->
+
+この章の単独実行版は `examples/10_bit_flip_correction.py` に収録しています。
+
+## はじめに
+
+誤り訂正とフォールトトレラント量子計算の章では：
+
+* 量子誤り訂正（QEC）
+* Surface Code
+* 論理量子ビット
+* Magic State
+* フォールトトレラント量子計算
+
+といった**実用量子コンピュータの内部構造**を扱いました。
+
+ただしこのあたりから **Pythonコードが減ってきた**
+
+と感じた方も多いと思います。
+
+そこでこの章では：
+
+**実際にQiskitで量子誤り訂正回路を書いてみる**
+
+回です。
+
+扱う内容：
+
+* bit-flip code（3量子ビット符号）
+* phase-flip code
+* Shor符号（構造理解）
+* syndrome測定
+* logical qubitの意味
+
+ここまで実装すると、**Surface Code理解の準備が整います**。
+
+---
+
+## 1. 量子誤り訂正の最小モデル：bit-flip code
+
+まず扱う最も基本的な誤りは **bit-flip error** です。
+
+誤り：
+
+```
+|0〉 → |1〉
+|1〉 → |0〉
+```
+
+これを防ぐ最小構造が **3量子ビット符号** です。
+
+エンコード：
+
+```
+|ψ〉 = α|0〉 + β|1〉
+↓
+α|000〉 + β|111〉
+```
+
+---
+
+## 2. Qiskitでbit-flip codeを実装する
+
+まずエンコード回路を書きます。
+
+```python
+from qiskit import QuantumCircuit
+
+qc = QuantumCircuit(3)
+
+# logical qubit → repetition encoding
+qc.cx(0, 1)
+qc.cx(0, 2)
+
+qc.draw("text")
+```
+
+これで：
+
+```
+|ψ〉 → α|000〉 + β|111〉
+```
+
+という符号化状態になります。
+
+---
+
+## 3. 誤りを人工的に発生させる
+
+次に **bit-flip error** を意図的に発生させます。
+
+例：
+
+```python
+qc.x(1)
+```
+
+つまり：
+
+```
+|000〉 → |010〉
+```
+
+のような状態になります。
+
+---
+
+## 4. syndrome測定とは何か？
+
+誤り訂正では **どこが壊れたか**？ を測定する必要があります。
+
+これを **syndrome測定** と呼びます。
+
+補助量子ビットを使います：
+
+```python
+from qiskit import QuantumCircuit
+
+qc = QuantumCircuit(5, 2)
+
+# encoding
+qc.cx(0, 1)
+qc.cx(0, 2)
+
+# error injection
+qc.x(1)
+
+# syndrome measurement
+qc.cx(0, 3)
+qc.cx(1, 3)
+
+qc.cx(1, 4)
+qc.cx(2, 4)
+
+qc.measure(3, 0)
+qc.measure(4, 1)
+
+qc.draw("text")
+```
+
+これで、**誤り位置が特定できます**。
+
+---
+
+## 5. syndromeの意味を理解する
+
+測定結果：
+
+```
+00 → errorなし
+01 → qubit2 error
+10 → qubit0 error
+11 → qubit1 error
+```
+
+のように対応します。
+
+つまり、**誤りの「場所」が分かる** という仕組みです。
+
+---
+
+## 6. phase-flip codeを実装する
+
+次に **phase-flip error** です。
+
+誤り：
+
+```
+|+〉 ↔ |−〉
+```
+
+これは **Zエラー** です。
+
+しかし：
+
+次の関係があります：
+
+```
+H Z H = X
+```
+
+つまり：
+
+phase-flipは
+
+bit-flipに変換できます。
+
+---
+
+## 7. phase-flip code回路
+
+実装：
+
+```python
+from qiskit import QuantumCircuit
+
+qc = QuantumCircuit(3)
+
+# basis change
+qc.h(0)
+qc.h(1)
+qc.h(2)
+
+# repetition encoding
+qc.cx(0, 1)
+qc.cx(0, 2)
+
+# error injection
+qc.z(1)
+
+# undo basis change
+qc.h(0)
+qc.h(1)
+qc.h(2)
+
+qc.draw("text")
+```
+
+これで、**phase errorを検出できます**。
+
+---
+
+## 8. Shor符号とは何か？
+
+ここまでで：
+
+* bit-flip
+* phase-flip
+
+両方扱えるようになりました。
+
+Shor符号は **この2つを組み合わせたものです**。
+
+構造：
+
+```
+1 qubit → 9 qubits
+```
+
+エンコード：
+
+```
+|ψ〉
+↓
+phase repetition
+↓
+bit repetition
+```
+
+という2段構造になります。
+
+---
+
+## 9. Shor符号の構造をQiskitで書く
+
+簡略版：
+
+```python
+from qiskit import QuantumCircuit
+
+qc = QuantumCircuit(9)
+
+# first repetition
+qc.cx(0, 1)
+qc.cx(0, 2)
+
+# hadamard transform
+qc.h(0)
+qc.h(1)
+qc.h(2)
+
+# second repetition
+qc.cx(0, 3)
+qc.cx(1, 4)
+qc.cx(2, 5)
+
+qc.cx(0, 6)
+qc.cx(1, 7)
+qc.cx(2, 8)
+
+qc.draw("text")
+```
+
+これで：
+
+bit + phase
+
+両方の誤りに対応できます。
+
+---
+
+## 10. logical qubitとは何か？
+
+ここまでの回路で重要なのは：
+
+```
+1 qubit → 複数qubits
+```
+
+という変換です。
+
+つまり：
+
+```
+physical qubit → logical qubit
+```
+
+への変換です。
+
+整理すると：
+
+| 種類             | 意味           |
+| -------------- | ------------ |
+| physical qubit | 実機の量子ビット     |
+| logical qubit  | 誤り訂正された量子ビット |
+
+---
+
+## 11. Surface Codeとの関係
+
+ここで扱う回路：
+
+3 qubit code
+Shor code
+
+はすべて：
+
+Surface Codeの前段階です。
+
+対応関係：
+
+```
+3 qubit code → 1次元
+Shor code → 2次元の前段階
+Surface code → 2次元格子
+```
+
+つまり：
+
+ここで扱う内容は
+
+Surface Codeの最小モデルです。
+
+---
+
+## 12. なぜこれが重要なのか？
+
+現在の量子コンピュータは **NISQ** 世代です。
+
+将来の量子コンピュータ：
+
+```
+Fault-tolerant QC
+```
+
+この間をつなぐのが **logical qubit** です。
+
+ここで実装した回路は **その最初の一歩です**。
+
+---
+
+## まとめ
+
+この章のポイント：
+
+* 3量子ビット符号でbit-flipを訂正できる
+* Hゲートでphase-flipをbit-flipへ変換できる
+* Shor符号で任意の単一誤りに対応できる
+* syndrome測定で誤り位置を特定できる
+* logical qubitは複数量子ビットで構成される
+* Surface Codeはこれらの拡張構造
+
+ここまでで、**誤り訂正付き量子計算の最小モデル** を実装できました。
+
+---
