@@ -62,6 +62,7 @@ GREEK = {
 def latex_to_unicode(value: str) -> str:
     """Make the source's small LaTeX subset readable without exposing commands."""
     value = value.strip()
+    value = value.replace(r"\|", "|")
     value = re.sub(r"\\text\{([^{}]*)\}", r"\1", value)
     value = re.sub(r"\\mathrm\{([^{}]*)\}", r"\1", value)
     value = re.sub(r"\\mathbf\{([^{}]*)\}", r"\1", value)
@@ -100,6 +101,38 @@ def latex_to_unicode(value: str) -> str:
     value = re.sub(r"_\{([^{}]+)\}", r"_(\1)", value)
     value = value.replace("{", "(").replace("}", ")")
     return value.strip()
+
+
+def split_markdown_table_row(row: str) -> list[str]:
+    """Split a Markdown table row without treating math/code pipes as columns."""
+    value = row.strip()
+    if value.startswith("|"):
+        value = value[1:]
+    if value.endswith("|") and not value.endswith(r"\|"):
+        value = value[:-1]
+
+    cells: list[str] = []
+    buffer: list[str] = []
+    in_code = False
+    in_math = False
+    backslashes = 0
+    for character in value:
+        escaped = backslashes % 2 == 1
+        if character == "`" and not escaped and not in_math:
+            in_code = not in_code
+        elif character == "$" and not escaped and not in_code:
+            in_math = not in_math
+
+        if character == "|" and not escaped and not in_code and not in_math:
+            cells.append("".join(buffer).strip())
+            buffer.clear()
+        else:
+            buffer.append(character)
+
+        backslashes = backslashes + 1 if character == "\\" else 0
+
+    cells.append("".join(buffer).strip())
+    return cells
 
 
 def inline_markup(text: str) -> str:
@@ -378,9 +411,9 @@ def make_pdf(config: dict) -> Path:
             while i < len(lines) and "|" in lines[i] and lines[i].strip():
                 table_lines.append(lines[i])
                 i += 1
-            def cells(row):
-                return [c.strip() for c in row.strip().strip("|").split("|")]
-            rows = [cells(table_lines[0])] + [cells(row) for row in table_lines[2:]]
+            rows = [split_markdown_table_row(table_lines[0])] + [
+                split_markdown_table_row(row) for row in table_lines[2:]
+            ]
             cols = max(len(row) for row in rows)
             rows = [row + [""] * (cols - len(row)) for row in rows]
             table_data = [[Paragraph(inline_markup(c), small) for c in row] for row in rows]
