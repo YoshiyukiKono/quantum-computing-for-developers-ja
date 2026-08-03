@@ -133,11 +133,14 @@ measure
 です。そのため、100回、1000回、10000回と繰り返して実行します。例：
 
 ```python
-from qiskit import Aer, execute
+from qiskit import transpile
+from qiskit_aer import AerSimulator
 
-backend = Aer.get_backend("qasm_simulator")
+backend = AerSimulator()
 
-job = execute(qc, backend, shots=1000)
+compiled = transpile(qc, backend)
+
+job = backend.run(compiled, shots=1000, seed_simulator=19)
 
 result = job.result()
 

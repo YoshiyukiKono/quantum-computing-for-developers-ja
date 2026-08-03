@@ -1,6 +1,8 @@
 # 第9章　古典計算、可逆計算、Toffoliゲート
 
 <!-- 編集元: `docs/26-classic-reversible-quantum.md` -->
+
+この章の単独実行版は `examples/06_toffoli.py` に収録しています。
 ## はじめに
 
 ここまでに扱った内容 **量子計算と線形代数はどのようにつながっているのか？**

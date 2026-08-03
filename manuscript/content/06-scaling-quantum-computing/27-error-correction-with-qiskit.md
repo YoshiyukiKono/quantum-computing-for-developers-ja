@@ -2,6 +2,8 @@
 
 <!-- 編集元: `docs/20.5-fault-tolerant-by-Qiskit.md` -->
 
+この章の単独実行版は `examples/10_bit_flip_correction.py` に収録しています。
+
 ## はじめに
 
 誤り訂正とフォールトトレラント量子計算の章では：

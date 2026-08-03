@@ -2,6 +2,8 @@
 
 <!-- 編集元: `docs/05-interference.md` -->
 
+この章の単独実行版は `examples/04_interference.py` に収録しています。
+
 ## はじめに
 
 測定について確認した重要な事実は：

@@ -2,7 +2,9 @@
 
 <!-- 編集元: `docs/01.md` -->
 
-(本書は、筆者が学習したい内容をAIによって生成した文章を元にしています。コードの動作確認・修正や文章の修正・追加を施している部分はありますが、内容の正確性については利用したAIに依存しています。左記ご理解の上、ご覧ください)
+<!-- 原稿生成時のAI利用に関する注記は、刊行時の開示方針を著者が判断する。 -->
+
+この章の単独実行版は `examples/01_first_circuit.py` に収録しています。
 
 ## はじめに
 
@@ -86,7 +88,7 @@ pip install qiskit
 
 では実際に書いてみましょう。
 
-```python:quantum_circuit_intro.py
+```python:01_first_circuit.py
 from qiskit import QuantumCircuit
 
 qc = QuantumCircuit(1,1)
@@ -171,7 +173,7 @@ qc.measure(0, 0)
 
 次はシミュレータで実行します。
 
-```python:quantum_simulator_intro.py
+```python:02_superposition.py
 from qiskit import QuantumCircuit
 from qiskit import transpile
 from qiskit_aer import AerSimulator

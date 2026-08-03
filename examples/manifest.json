@@ -1,0 +1,12 @@
+[
+  {"file": "01_first_circuit.py", "manuscript": "manuscript/content/01-first-circuits/01-first-quantum-circuit.md"},
+  {"file": "02_superposition.py", "manuscript": "manuscript/content/01-first-circuits/02-superposition-and-quantum-parallelism.md"},
+  {"file": "03_bell_state.py", "manuscript": "manuscript/content/02-quantum-effects/04-entanglement-and-bell-state.md"},
+  {"file": "04_interference.py", "manuscript": "manuscript/content/02-quantum-effects/05-interference-and-amplitudes.md"},
+  {"file": "05_grover_two_qubit.py", "manuscript": "manuscript/content/02-quantum-effects/07-quantum-gates-and-grover.md"},
+  {"file": "06_toffoli.py", "manuscript": "manuscript/content/03-math-and-circuits/09-reversible-computing-and-toffoli.md"},
+  {"file": "07_qft_round_trip.py", "manuscript": "manuscript/content/04-algorithm-patterns/13-qft-and-phase-estimation.md"},
+  {"file": "08_vqe_single_qubit.py", "manuscript": "manuscript/content/05-nisq-and-vqa/16-vqe.md"},
+  {"file": "09_qaoa_two_node_maxcut.py", "manuscript": "manuscript/content/05-nisq-and-vqa/18-qaoa-max-cut.md"},
+  {"file": "10_bit_flip_correction.py", "manuscript": "manuscript/content/06-scaling-quantum-computing/27-error-correction-with-qiskit.md"}
+]

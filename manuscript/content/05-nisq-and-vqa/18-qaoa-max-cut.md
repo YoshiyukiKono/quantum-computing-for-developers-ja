@@ -1,6 +1,8 @@
 # 第18章　Max-CutのQAOA回路
 
 <!-- 編集元: `docs/12-Max-Cut.md` -->
+
+この章の単独実行版は `examples/09_qaoa_two_node_maxcut.py` に収録しています。
 ## はじめに
 
 ここまでに扱った内容：
